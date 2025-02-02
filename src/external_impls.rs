@@ -194,3 +194,70 @@ mod actix_impl {
         }
     }
 }
+
+#[cfg(feature = "cpe")]
+mod cpe_impl {
+    use crate::{Context, DeepSizeOf};
+    use cpe::component::OwnedComponent;
+    use cpe::cpe::{Cpe, Language};
+    use cpe::uri::OwnedUri;
+
+    impl DeepSizeOf for OwnedComponent {
+        fn deep_size_of_children(&self, ctx: &mut Context) -> usize {
+            if let OwnedComponent::Value(v) = self {
+                v.deep_size_of_children(ctx)
+            } else {
+                0
+            }
+        }
+    }
+
+    impl DeepSizeOf for Language {
+        fn deep_size_of_children(&self, ctx: &mut Context) -> usize {
+            if let Language::Language(v) = self {
+                v.as_str().deep_size_of_children(ctx)
+            } else {
+                0
+            }
+        }
+    }
+
+    impl DeepSizeOf for OwnedUri {
+        fn deep_size_of_children(&self, ctx: &mut Context) -> usize {
+            self.vendor().to_owned().deep_size_of_children(ctx)
+                + self.product().to_owned().deep_size_of_children(ctx)
+                + self.version().to_owned().deep_size_of_children(ctx)
+                + self.update().to_owned().deep_size_of_children(ctx)
+                + self.edition().to_owned().deep_size_of_children(ctx)
+                + self.sw_edition().to_owned().deep_size_of_children(ctx)
+                + self.target_sw().to_owned().deep_size_of_children(ctx)
+                + self.other().to_owned().deep_size_of_children(ctx)
+                + self.language().to_owned().deep_size_of_children(ctx)
+        }
+    }
+}
+
+#[cfg(feature = "petgraph")]
+mod petgraph_impl {
+    use crate::{Context, DeepSizeOf};
+    use petgraph::graph::{Edge, Graph, Node};
+
+    impl<N: DeepSizeOf> DeepSizeOf for Node<N> {
+        fn deep_size_of_children(&self, ctx: &mut Context) -> usize {
+            self.weight.deep_size_of_children(ctx)
+        }
+    }
+
+    impl<E: DeepSizeOf> DeepSizeOf for Edge<E> {
+        fn deep_size_of_children(&self, ctx: &mut Context) -> usize {
+            self.weight.deep_size_of_children(ctx)
+        }
+    }
+
+    impl<N: DeepSizeOf, E: DeepSizeOf> DeepSizeOf for Graph<N, E> {
+        fn deep_size_of_children(&self, ctx: &mut Context) -> usize {
+            self.raw_nodes().deep_size_of_children(ctx)
+                + self.raw_edges().deep_size_of_children(ctx)
+        }
+    }
+}

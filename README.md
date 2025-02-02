@@ -37,6 +37,8 @@ references, and are not counted.
 * `chrono`: (version 0.4)
 * `actix`: (version 0.11)
 * `tokio`: (version 1.1)
+* `cpe`: (version 0.1.5)
+* `petgraph`: (version 0.7.1)
 
 ## Example Code
 
